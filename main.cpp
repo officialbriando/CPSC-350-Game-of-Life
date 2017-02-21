@@ -19,8 +19,9 @@ int main()
 	int rowG, colG;
 	string file;
 	setDimensions(rowG, colG);
-	int** GoL = new int*[rowG];
+	char** GoL = new char*[rowG];
 	for(int i = 0; i < rowG; ++i) GoL[i] = new int[colG];
+		
 	initializeBoard(rowG, colG, 0.5, GoL);
 	printBoard(rowG, colG, GoL);
 
