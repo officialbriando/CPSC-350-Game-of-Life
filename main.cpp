@@ -8,36 +8,41 @@ using namespace std;
 void getDimensions(int rows, int columns);
 void setDimensions(int& rows, int& columns);
 
-void initializeBoard(int rows, int columns, double density, char** board);
-void createBoard(string file, int *board);
-
-void nextBoard(int j, int k, int *board);
-void printBoard(int j, int k, int** board);#include <iostream>
-#include <fstream> //File input and output
-#include <cstdlib> //Random method
-#include <string>  //String class 
-
-using namespace std;
-
-void getDimensions(int rows, int columns);
-void setDimensions(int& rows, int& columns);
-
-void initializeBoard(int rows, int columns, double density, char** board);
+void initializeBoard(int rows, int columns, double density, char**& board);
 void createMappedBoard(string file, int& rows, int& columns);
 
-void nextBoard(int j, int k, int** board);
-void printBoard(int j, int k, int** board);
+void nextGeneration(int rows, int columns, char**& board);
+void printBoard(int rows, int columns, char** board);
 		
 int main()
 {
-	int rowG, colG;
+	int row, col;
+	int next;
 	string file;
-	setDimensions(rowG, colG);
-	char** GoL = new char*[rowG];
-	for(int i = 0; i < rowG; ++i) GoL[i] = new int[colG];
+	int stabilized = 0;
 
-	initializeBoard(rowG, colG, 0.5, GoL);
-	printBoard(rowG, colG, GoL);
+	setDimensions(row, col);
+
+	char** currentGen = new char*[row];
+	for(int i = 0; i < row; ++i) 
+	{
+		currentGen[i] = new char[col];
+	}
+
+	initializeBoard(row, col, 0.5, currentGen);
+	cout << "Board initialized" << endl;
+	printBoard(row, col, currentGen);
+	cout << "Board printed";
+
+	cout << "while loop started";
+	while(stabilized == 0)
+	{
+		nextGeneration(row, col, currentGen);
+		printBoard(row, col, currentGen);
+
+		"Press 1 to see the next generation: ";
+		cin >> next;
+	}
 
 	return 0;
 }
@@ -57,7 +62,7 @@ void setDimensions(int& rows, int& columns) //Sets the rows and columns for the 
 	cin >> columns;
 }
 
-void initializeBoard(int rows, int columns, double density, char** board) //Initializes the board with the set population density. 
+void initializeBoard(int rows, int columns, double density, char**& board) //Initializes the board with the set population density. 
 {
 	for(int i = 0; i < rows; ++i)
 	{
@@ -66,7 +71,7 @@ void initializeBoard(int rows, int columns, double density, char** board) //Init
 			double a = (double)rand()/(RAND_MAX);
 			if(a <= density)
 			{
-				board[i][j] = 'x';
+				board[i][j] = 'X';
 			}
 			else
 			{
@@ -76,28 +81,30 @@ void initializeBoard(int rows, int columns, double density, char** board) //Init
 	}
 }
 
-void createMappedBoard(string file, int& rows, int& columns)
+void createMappedBoard(string file, int& rows, int& columns) //Reads in the first two ints of the mapfile and sets them.
 {
 
 	ifstream inputStream;
 	inputStream.open(file.c_str());
 
-	ifstream >> rows >> columns;
+	inputStream >> rows >> columns;
+
+	inputStream.close();
 }
 
-void initializeMappedBoard(string file, char** board)
+void initializeMappedBoard(string file, char**& board) //Iterates through each line of text and sets each row accordingly.
 {
 	int x, y;
-	char text;
+	string text;
 
 	int row = 0;
 
 	ifstream inputStream;
 	inputStream.open(file.c_str());
 
-	ifstream >> x >> y;
+	inputStream >> x >> y;
 
-	while(ifstream >> text)
+	while(inputStream >> text)
 	{
 		for(int i = 0; i < x; ++i)
 		{
@@ -106,69 +113,259 @@ void initializeMappedBoard(string file, char** board)
 
 		row++;
 	}
+
+	inputStream.close();
 }
 
-void printBoard(int rows, int columns, char** board){
+void nextGeneration(int rows, int columns, char**& board) //Creates a new board with adjustments for next generation, then copies it to the primary board.
+{
+	cout << "new board not yet created";
+	char** nextGen = new char*[rows]; //Creates a second board based on first board dimensions for copying later.
+	for(int i = 0; i < rows; ++i)
+	{
+		nextGen[i] = new char[columns];
+	}
+
+	cout << "new board created";
+
+	//Creating the next generation based on the previous.
+
 	for(int i = 0; i < rows; ++i)
 	{
 		for(int j = 0; j < columns; ++j)
 		{
-			cout << board[i][j];			
+			int count = 0; //Keeps track of amount of neighbors.
+
+			if(i == 0 && j == 0) //All checks necessary to avoid IndexOutOfBounds error.
+			{
+				if(board[i+1][j] == 'X') //Only 3 possible neighbors for corner slots in classic mode.
+				{
+					count++;
+				}
+				if(board[i][j+1] == 'X')
+				{
+					count++;
+				}
+				if(board[i+1][j+1] == 'X')
+				{
+					count++;
+				}
+			}
+			else if(i == 0 && j == (columns - 1))
+			{
+				if(board[i+1][j] == 'X')
+				{
+					count++;
+				}
+				if(board[i][j-1] == 'X')
+				{
+					count++;
+				}
+				if(board[i+1][j-1] == 'X')
+				{
+					count++;
+				}
+			}
+			else if(j == 0) //Only 5 possible neighbors for side slots in classic mode.
+			{
+				if(board[i-1][j] == 'X')
+				{
+					count++;
+				}
+				if(board[i+1][j] == 'X')
+				{
+					count++;
+				}
+				if(board[i][j+1] == 'X')
+				{
+					count++;
+				}
+				if(board[i+1][j+1] == 'X')
+				{
+					count++;
+				}
+				if(board[i-1][j+1] == 'X')
+				{
+					count++;
+				}
+			}
+
+			else if(i == 0)
+			{
+				if(board[i+1][j] == 'X')
+				{
+					count++;
+				}
+				if(board[i][j+1] == 'X')
+				{
+					count++;
+				}
+				if(board[i+1][j+1] == 'X')
+				{
+					count++;
+				}
+				if(board[i][j-1] =='X')
+				{
+					count++;
+				}
+				if(board[i+1][j-1] == 'X')
+				{
+					count++;
+				}
+			}
+			else if(j == (columns - 1))
+			{
+				if(board[i-1][j] == 'X')
+				{
+					count++;
+				}
+				if(board[i+1][j] == 'X')
+				{
+					count++;
+				}
+				if(board[i][j-1] == 'X')
+				{
+					count++;
+				}
+				if(board[i+1][j-1] == 'X')
+				{
+					count++;
+				}
+				if(board[i-1][j-1] == 'X')
+				{
+					count++;
+				}
+			}
+			else if(i == (rows - 1))
+			{
+				if(board[i+1][j] == 'X')
+				{
+					count++;
+				}
+				if(board[i][j+1] == 'X')
+				{
+					count++;
+				}
+				if(board[i-1][j+1] == 'X')
+				{
+					count++;
+				}
+				if(board[i][j-1] =='X')
+				{
+					count++;
+				}
+				if(board[i-1][j-1] == 'X')
+				{
+					count++;
+				}
+			}
+			else if(i == (rows - 1 ) && j == (columns - 1))
+			{
+				if(board[i-1][j] == 'X')
+				{
+					count++;
+				}
+				if(board[i][j-1] == 'X')
+				{
+					count++;
+				}
+				if(board[i-1][j-1] == 'X')
+				{
+					count++;
+				}
+			}
+			else if(i == (rows - 1) && j == 0)
+			{
+				if(board[i-1][j] == 'X')
+				{
+					count++;
+				}
+				if(board[i][j+1] == 'X')
+				{
+					count++;
+				}
+				if(board[i-1][j+1] == 'X')
+				{
+					count++;
+				}
+			}
+			else //Eight possible neighbors for any given middle slot.
+			{
+				if(board[i+1][j] == 'X')
+				{
+					count++;
+				}
+				if(board[i][j+1] == 'X')
+				{
+					count++;
+				}
+				if(board[i+1][j+1] == 'X')
+				{
+					count++;
+				}
+				if(board[i][j-1] =='X')
+				{
+					count++;
+				}
+				if(board[i-1][j] == 'X')
+				{
+					count++;
+				}
+				if(board[i-1][j-1] == 'X')
+				{
+					count++;
+				}
+				if(board[i+1][j-1] =='X')
+				{
+					count++;
+				}
+				if(board[i-1][j+1] == 'X')
+				{
+					count++;
+				}
+			}
+
+			if(count < 2) nextGen[i][j] = '-';
+			else if(count == 2) nextGen[i][j] = board[i][j];
+			else if(count == 3) nextGen[i][j] = 'X';
+			else if(count > 3) nextGen[i][j] = '-';
 		}
-
-		cout << endl;
 	}
-}
-		
-int main()
-{
-	int rowG, colG;
-	string file;
-	setDimensions(rowG, colG);
-	char** GoL = new char*[rowG];
-	for(int i = 0; i < rowG; ++i) GoL[i] = new int[colG];
-		
-	initializeBoard(rowG, colG, 0.5, GoL);
-	printBoard(rowG, colG, GoL);
 
-	return 0;
-}
+	cout << "new generation created";
 
-void getDimensions(int rows, int columns) //Returns the rows and columns for the board.
-{
-	cout << "Rows: " << rows << endl
-		<< "Columns: " << columns << endl;	
-}
+	//Checking to see if the next generation is the same as the previous, returns '1' if true, '0' if false.
+	bool stabilized = true;
 
-void setDimensions(int& rows, int& columns) //Sets the rows and columns for the board.
-{
-	cout << "Enter the amount of rows: ";
-	cin >> rows;
-
-	cout << "Enter the amount of columns: ";
-	cin >> columns;
-}
-
-void initializeBoard(int rows, int columns, double density, char** board) //Initializes the board with the set population density. 
-{
 	for(int i = 0; i < rows; ++i)
 	{
 		for(int j = 0; j < columns; ++j)
 		{
-			double a = (double)rand()/(RAND_MAX);
-			if(a <= density)
+			if(nextGen[i][j] != board[i][j])
 			{
-				board[i][j] = 'x';
-			}
-			else
-			{
-				board[i][j] = ' ';
+				stabilized = false;
 			}
 		}
 	}
-}
 
-void printBoard(int rows, int columns, char** board){
+	if(stabilized)
+	{
+		cout << "The world has stabilized. There are no further changes to the population." << endl;
+	}
+	else //Copies the next generation over to the primary board.
+	{
+		for(int i = 0; i < rows; ++i)
+		{
+			for(int j = 0; j < columns; ++j)
+			{
+				board[i][j] = nextGen[i][j];
+			}
+		}
+	}
+}	
+
+void printBoard(int rows, int columns, char** board)
+{
 	for(int i = 0; i < rows; ++i)
 	{
 		for(int j = 0; j < columns; ++j)
