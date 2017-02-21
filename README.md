@@ -1,1 +1,0 @@
-# CPSC-350-Game-of-Life
