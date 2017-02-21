@@ -213,6 +213,36 @@ void nextGeneration(int rows, int columns, char**& board) //Creates a new board 
 					count++;
 				}
 			}
+			else if(i == (rows - 1 ) && j == (columns - 1))
+			{
+				if(board[i-1][j] == 'X')
+				{
+					count++;
+				}
+				if(board[i][j-1] == 'X')
+				{
+					count++;
+				}
+				if(board[i-1][j-1] == 'X')
+				{
+					count++;
+				}
+			}
+			else if(i == (rows - 1) && j == 0)
+			{
+				if(board[i-1][j] == 'X')
+				{
+					count++;
+				}
+				if(board[i][j+1] == 'X')
+				{
+					count++;
+				}
+				if(board[i-1][j+1] == 'X')
+				{
+					count++;
+				}
+			}
 			else if(j == (columns - 1))
 			{
 				if(board[i-1][j] == 'X')
@@ -255,36 +285,6 @@ void nextGeneration(int rows, int columns, char**& board) //Creates a new board 
 					count++;
 				}
 				if(board[i-1][j-1] == 'X')
-				{
-					count++;
-				}
-			}
-			else if(i == (rows - 1 ) && j == (columns - 1))
-			{
-				if(board[i-1][j] == 'X')
-				{
-					count++;
-				}
-				if(board[i][j-1] == 'X')
-				{
-					count++;
-				}
-				if(board[i-1][j-1] == 'X')
-				{
-					count++;
-				}
-			}
-			else if(i == (rows - 1) && j == 0)
-			{
-				if(board[i-1][j] == 'X')
-				{
-					count++;
-				}
-				if(board[i][j+1] == 'X')
-				{
-					count++;
-				}
-				if(board[i-1][j+1] == 'X')
 				{
 					count++;
 				}
