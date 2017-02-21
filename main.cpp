@@ -11,7 +11,7 @@ void setDimensions(int& rows, int& columns);
 void initializeBoard(int rows, int columns, double density, char**& board);
 void createMappedBoard(string file, int& rows, int& columns);
 
-void nextGeneration(int rows, int columns, char**& board);
+int nextGeneration(int rows, int columns, char**& board);
 void printBoard(int rows, int columns, char** board);
 		
 int main()
@@ -30,18 +30,22 @@ int main()
 	}
 
 	initializeBoard(row, col, 0.5, currentGen);
-	cout << "Board initialized" << endl;
 	printBoard(row, col, currentGen);
-	cout << "Board printed";
 
-	cout << "while loop started";
+	cout << "Press enter to start the simulation: " << endl;
+
 	while(stabilized == 0)
 	{
-		nextGeneration(row, col, currentGen);
+		stabilized  = nextGeneration(row, col, currentGen);
 		printBoard(row, col, currentGen);
 
-		"Press 1 to see the next generation: ";
-		cin >> next;
+		if(stabilized == 1)
+		{
+			break;
+		}
+
+		cout << "Press enter to see the next generation: " << endl;
+		cin.ignore();
 	}
 
 	return 0;
@@ -117,16 +121,13 @@ void initializeMappedBoard(string file, char**& board) //Iterates through each l
 	inputStream.close();
 }
 
-void nextGeneration(int rows, int columns, char**& board) //Creates a new board with adjustments for next generation, then copies it to the primary board.
+int nextGeneration(int rows, int columns, char**& board) //Creates a new board with adjustments for next generation, then copies it to the primary board.
 {
-	cout << "new board not yet created";
 	char** nextGen = new char*[rows]; //Creates a second board based on first board dimensions for copying later.
 	for(int i = 0; i < rows; ++i)
 	{
 		nextGen[i] = new char[columns];
 	}
-
-	cout << "new board created";
 
 	//Creating the next generation based on the previous.
 
@@ -162,6 +163,36 @@ void nextGeneration(int rows, int columns, char**& board) //Creates a new board 
 					count++;
 				}
 				if(board[i+1][j-1] == 'X')
+				{
+					count++;
+				}
+			}
+			else if(i == (rows - 1 ) && j == (columns - 1))
+			{
+				if(board[i-1][j] == 'X')
+				{
+					count++;
+				}
+				if(board[i][j-1] == 'X')
+				{
+					count++;
+				}
+				if(board[i-1][j-1] == 'X')
+				{
+					count++;
+				}
+			}
+			else if(i == (rows - 1) && j == 0)
+			{
+				if(board[i-1][j] == 'X')
+				{
+					count++;
+				}
+				if(board[i][j+1] == 'X')
+				{
+					count++;
+				}
+				if(board[i-1][j+1] == 'X')
 				{
 					count++;
 				}
@@ -213,36 +244,6 @@ void nextGeneration(int rows, int columns, char**& board) //Creates a new board 
 					count++;
 				}
 			}
-			else if(i == (rows - 1 ) && j == (columns - 1))
-			{
-				if(board[i-1][j] == 'X')
-				{
-					count++;
-				}
-				if(board[i][j-1] == 'X')
-				{
-					count++;
-				}
-				if(board[i-1][j-1] == 'X')
-				{
-					count++;
-				}
-			}
-			else if(i == (rows - 1) && j == 0)
-			{
-				if(board[i-1][j] == 'X')
-				{
-					count++;
-				}
-				if(board[i][j+1] == 'X')
-				{
-					count++;
-				}
-				if(board[i-1][j+1] == 'X')
-				{
-					count++;
-				}
-			}
 			else if(j == (columns - 1))
 			{
 				if(board[i-1][j] == 'X')
@@ -268,7 +269,7 @@ void nextGeneration(int rows, int columns, char**& board) //Creates a new board 
 			}
 			else if(i == (rows - 1))
 			{
-				if(board[i+1][j] == 'X')
+				if(board[i-1][j] == 'X')
 				{
 					count++;
 				}
@@ -332,8 +333,6 @@ void nextGeneration(int rows, int columns, char**& board) //Creates a new board 
 		}
 	}
 
-	cout << "new generation created";
-
 	//Checking to see if the next generation is the same as the previous, returns '1' if true, '0' if false.
 	bool stabilized = true;
 
@@ -351,6 +350,7 @@ void nextGeneration(int rows, int columns, char**& board) //Creates a new board 
 	if(stabilized)
 	{
 		cout << "The world has stabilized. There are no further changes to the population." << endl;
+		return 1;
 	}
 	else //Copies the next generation over to the primary board.
 	{
@@ -361,6 +361,7 @@ void nextGeneration(int rows, int columns, char**& board) //Creates a new board 
 				board[i][j] = nextGen[i][j];
 			}
 		}
+		return 0;
 	}
 }	
 
