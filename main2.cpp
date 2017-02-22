@@ -43,10 +43,16 @@ void setDimensions(int& rows, int& columns, double& density){ //Sets the rows an
 }
 
 void initializeBoard(int rows, int columns, double density, char**& board){ //Initializes the board with the set population density. 
+	for(int n = 0; n < rows; ++n){
+		for(int m = 0; m < columns; ++m){
+			board[n][m] = '-';
+		}
+	}
 	for(int i = 0; i < rows; ++i){
 		for(int j = 0; j < columns; ++j){
-			double a = (double)rand()/(RAND_MAX);
-			if(a <= density) board[i][j] = 'X';
+			double a = 0;
+			a = (double)rand()/(RAND_MAX);
+			if(a<=density) board[i][j] = 'X';
 			else board[i][j] = '-';
 		}
 	}
@@ -81,31 +87,33 @@ void prepGame(string& file, int& rows, int& columns){
 	cout << "0 - Random Assignment \t 1 - Map Assignment\n";
 	cout << "Please enter the number of your desired option: ";
 	cin >> input;
-	while(input != 0 || input != 1){	//loop to check for valid input
+	while(input != 0 || input != 1){
 		if(input < 0 || input > 1){
 			cout << "Please enter a valid number listed above: ";
 			cin >> input;
 		}
-		else if(input == 0){	//random assignment
+		else if(input == 0){
 			double density;
-			setDimensions(rows, columns, density);	//set variables
-			char** currentGen = new char*[rows];	//initialize 2d array
+			setDimensions(rows, columns, density);
+			char** currentGen = new char*[rows];
 			for(int i = 0; i < rows; ++i) {currentGen[i] = new char[columns];}
-			initializeBoard(rows, columns, density, currentGen);	//fill array with elements
-			startGame(rows, columns, currentGen);	//begin simulation
+			initializeBoard(rows, columns, density, currentGen);
+			startGame(rows, columns, currentGen);
 		}
-		else if(input == 1) {	//map assignment
+		else if(input == 1) {
 			cout <<"Please enter the filename of your map: ";
-			cin >> file;	setDimensions(file.c_str(), rows, columns);	//read file for dimensions of 2d array
-			char** currentGen = new char*[rows];	//initialize 2d array
+			cin >> file;	setDimensions(file.c_str(), rows, columns);
+			char** currentGen = new char*[rows];
 			for(int i = 0; i < rows; ++i) {currentGen[i] = new char[columns];}
-			initializeBoard(file.c_str(), currentGen);	//match 2d array to map file
-			startGame(rows, columns, currentGen);	//begin simulation
+			initializeBoard(file.c_str(), currentGen);
+			startGame(rows, columns, currentGen);
 		}
 	}
 }
 
 void startGame(int& rows, int& columns, char**& board){
+	cout << "Starting Generation" << endl;
+	printBoard(rows, columns, board);
 	int stabilized = 0, gen = 1;
 	cout << "Press enter to start the simulation: ";
 	cin.ignore();	cin.ignore();
