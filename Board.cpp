@@ -115,7 +115,7 @@ void Board::startGame(int& rows, int& columns, char**& board){
 	cin.ignore();	cin.ignore();
 	while(stabilized == 0) //Sets the while loop using an indicator for whether the board has stabilized.
 	{
-		stabilized = nextBoard(rows, columns, board); //Integrated method for creating new generations returns a value indicating stabilization.
+		stabilized = nextBoardClassic(rows, columns, board); //Integrated method for creating new generations returns a value indicating stabilization.
 
 		if(stabilized == 1)
 		{
@@ -141,7 +141,7 @@ void Board::printBoard(int rows, int columns, char** board){
 	}
 }
 
-int Board::nextBoard(int rows, int columns, char**& board) //Creates a new board with adjustments for next generation, then copies it to the primary board.
+int Board::nextBoardClassic(int rows, int columns, char**& board) //Creates a new board with adjustments for next generation, then copies it to the primary board.
 {
 	char** nextGen = new char*[rows]; //Creates a second board based on first board dimensions for copying later.
 	for(int i = 0; i < rows; ++i) nextGen[i] = new char[columns];
