@@ -17,6 +17,7 @@ class Board
 		void initializeBoard(string file, char**& board);
 
 		int nextBoardClassic(int rows, int columns, char**& board);
+		int nextBoardTorus(int rows, int columns, char**& board);
 		void printBoard(int rows, int columns, char** board);
 
 		void prepGame(string& file, int& rows, int& columns);
