@@ -6,37 +6,23 @@
 using namespace std;
 
 void getDimensions(int rows, int columns);
-void setDimensions(int& rows, int& columns);
+void setDimensions(int& rows, int& columns, double& density);
 void setDimensions(string file, int& rows, int& columns);
 
 void initializeBoard(int rows, int columns, double density, char**& board);
 void initializeBoard(string file, char**& board);
 
-int nextGeneration(int rows, int columns, char**& board);
+int nextBoard(int rows, int columns, char**& board);
 void printBoard(int rows, int columns, char** board);
-		
+
+void prepGame(string& file, int& rows, int& columns);
+void startGame(int& rows, int& columns, char**& board);
+
 int main(){
 	int row, col;
 	string file;
-	int stabilized = 0;
+	prepGame(file, row, col);
 
-	setDimensions("map.txt", row, col);
-	char** currentGen = new char*[row];
-	for(int i = 0; i < row; ++i) {currentGen[i] = new char[col];}
-	initializeBoard("map.txt", currentGen);
-	printBoard(row, col, currentGen);
-
-	cout << "Press enter to start the simulation: " << endl;
-	cin.ignore();	cin.ignore();
-	while(stabilized == 0){
-		stabilized  = nextGeneration(row, col, currentGen);
-		printBoard(row, col, currentGen);
-
-		if(stabilized == 1) break;
-
-		cout << "Press enter to see the next generation: " << endl;
-		cin.ignore();
-	}
 	return 0;
 }
 
@@ -45,12 +31,15 @@ void getDimensions(int rows, int columns){ //Returns the rows and columns for th
 		<< "Columns: " << columns << endl;	
 }
 
-void setDimensions(int& rows, int& columns){ //Sets the rows and columns for the board.
+void setDimensions(int& rows, int& columns, double& density){ //Sets the rows and columns for the board.
 	cout << "Enter the amount of rows: ";
 	cin >> rows;
 
 	cout << "Enter the amount of columns: ";
 	cin >> columns;
+	
+	cout << "Enter the density of the board. Number must be between 0 and 1: ";
+	cin >> density;
 }
 
 void initializeBoard(int rows, int columns, double density, char**& board){ //Initializes the board with the set population density. 
@@ -85,7 +74,54 @@ void initializeBoard(string file, char**& board){ //Iterates through each line o
 	inputStream.close();
 }
 
-int nextGeneration(int rows, int columns, char**& board) //Creates a new board with adjustments for next generation, then copies it to the primary board.
+void prepGame(string& file, int& rows, int& columns){
+	int input;
+	cout << "This program simulates John Conway's Game of Life.\n";
+	cout << "You can initialize your simulation from a random assignment, or a txt file.\n";
+	cout << "0 - Random Assignment \t 1 - Map Assignment\n";
+	cout << "Please enter the number of your desired option: ";
+	cin >> input;
+	while(input != 0 || input != 1){	//loop to check for valid input
+		if(input < 0 || input > 1){
+			cout << "Please enter a valid number listed above: ";
+			cin >> input;
+		}
+		else if(input == 0){	//random assignment
+			double density;
+			setDimensions(rows, columns, density);	//set variables
+			char** currentGen = new char*[rows];	//initialize 2d array
+			for(int i = 0; i < rows; ++i) {currentGen[i] = new char[columns];}
+			initializeBoard(rows, columns, density, currentGen);	//fill array with elements
+			startGame(rows, columns, currentGen);	//begin simulation
+		}
+		else if(input == 1) {	//map assignment
+			cout <<"Please enter the filename of your map: ";
+			cin >> file;	setDimensions(file.c_str(), rows, columns);	//read file for dimensions of 2d array
+			char** currentGen = new char*[rows];	//initialize 2d array
+			for(int i = 0; i < rows; ++i) {currentGen[i] = new char[columns];}
+			initializeBoard(file.c_str(), currentGen);	//match 2d array to map file
+			startGame(rows, columns, currentGen);	//begin simulation
+		}
+	}
+}
+
+void startGame(int& rows, int& columns, char**& board){
+	int stabilized = 0, gen = 1;
+	cout << "Press enter to start the simulation: ";
+	cin.ignore();	cin.ignore();
+	while(stabilized == 0){
+		stabilized  = nextBoard(rows, columns, board);
+		cout << "Generation " << gen << endl;
+		printBoard(rows, columns, board);
+
+		if(stabilized == 1) break;
+		gen++;
+		cout << "Press enter to see the next generation: " << endl;
+		cin.ignore();
+	}
+}
+
+int nextBoard(int rows, int columns, char**& board) //Creates a new board with adjustments for next generation, then copies it to the primary board.
 {
 	char** nextGen = new char*[rows]; //Creates a second board based on first board dimensions for copying later.
 	for(int i = 0; i < rows; ++i) nextGen[i] = new char[columns];
