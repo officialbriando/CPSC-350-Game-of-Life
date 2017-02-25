@@ -2,6 +2,7 @@
 #include <fstream> //File input and output
 #include <cstdlib> //Random method
 #include <string>  //String class 
+#include <unistd.h>	//Sleep function
 
 using namespace std;
 
@@ -15,6 +16,7 @@ int nextBoardClassic(int rows, int columns, char**& board);
 int nextBoardTorus(int rows, int columns, char**& board);
 int nextBoardMirrored(int rows, int columns, char**& board);
 void printBoard(int rows, int columns, char** board);
+void printBoardFile(int rows, int columns, char** board, ofstream& file);
 
 void prepGame(string& file, int& rows, int& columns);
 void startGame(int& rows, int& columns, char**& board);
@@ -40,7 +42,6 @@ void setDimensions(int& rows, int& columns, double& density)  //Sets the rows an
 		cout << "Please enter a number greater than 1: ";
 		cin >> rows;
 	}
-
 	cout << "Enter the amount of columns: ";
 	cin >> columns;
 	
@@ -51,7 +52,7 @@ void setDimensions(int& rows, int& columns, double& density)  //Sets the rows an
 		}
 		cout << "Please enter a number greater than 1: ";
 		cin >> columns;
-	}	
+	}
 	cout << "Enter the density of the board. Number must be between 0 and 1: ";
 	cin >> density;
 	while(density < 0 || density > 1 || cin.fail()){
@@ -112,7 +113,8 @@ void prepGame(string& file, int& rows, int& columns) //Method for running the en
 	cout << "Please enter the number of your desired option: ";
 	cin >> input;
 
-	while(input < 0 || input > 1 || cin.fail()){
+	while(input < 0 || input > 1 || cin.fail())
+	{	//Checking for incorrect input
 		if(cin.fail())
 		{
 			cin.clear();
@@ -147,7 +149,22 @@ void startGame(int& rows, int& columns, char**& board){
 	cout << "Which mode would you like to play?\n" <<
 	"1 - Classic Mode\t 2 - Torus Mode\t 3 - Mirror Mode\n" <<
 	"Enter the number of your desired mode: "; cin >> input;
-	while(input < 1 || input > 3 || cin.fail()){
+	while(input < 1 || input > 3 || cin.fail())
+	{
+		if(cin.fail()){
+			cin.clear();
+			cin.ignore(256, '\n');
+		}
+		cout << "Please enter a valid number listed above: ";
+		cin >> input;	
+	}
+	cout << "How would you like to like the program to proceed?\n"
+	<< "1 - Let the program run the simulation on its own\n"
+	<< "2 - Press enter to output each consecutive generation\n"
+	<< "3 - Output the simulation to a file, 'GameOfLife.txt'\n" << "Enter input: ";
+	cin >> output;
+	while(output < 1 || output > 3 || cin.fail())
+	{
 		if(cin.fail())
 		{
 			cin.clear();
@@ -156,30 +173,58 @@ void startGame(int& rows, int& columns, char**& board){
 		cout << "Please enter a valid number listed above: ";
 		cin >> input;	
 	}
-	cout << " Generation 0" << endl;
-	printBoard(rows, columns, board);
-	int stabilized = 0, gen = 1;
-	cout << "Press enter to start the simulation: ";
-	cin.ignore();	cin.ignore();
-	while(stabilized == 0) //Sets the while loop using an indicator for whether the board has stabilized.
+	if(output == 1 || output == 2)
 	{
-		if(input == 1)stabilized = nextBoardClassic(rows, columns, board); //Integrated method for creating new generations returns a value indicating stabilization.
-		else if(input == 2)stabilized = nextBoardTorus(rows, columns, board);
-		else if(input == 3)stabilized = nextBoardMirrored(rows, columns, board);
-
-		if(stabilized == 1)
-		{
-			cout << "Press enter to exit the program." << endl;
-			cin.ignore();
-			break;
-		}
-
-		cout << "Generation " << gen << endl;
+		cout << " Generation 0" << endl;
 		printBoard(rows, columns, board);
+		int stabilized = 0, gen = 1;
+		cout << "Press enter to start the simulation: ";
+		cin.ignore();	cin.ignore();
+		while(stabilized == 0) //Sets the while loop using an indicator for whether the board has stabilized.
+		{
+			if(input == 1)stabilized = nextBoardClassic(rows, columns, board); //Integrated method for creating new generations returns a value indicating stabilization.
+			else if(input == 2)stabilized = nextBoardTorus(rows, columns, board);
+			else if(input == 3)stabilized = nextBoardMirrored(rows, columns, board);
+	
+			if(stabilized == 1)
+			{
+				cout << "Press enter to exit the program." << endl;
+				cin.ignore();
+				break;
+			}
+	
+			cout << "Generation " << gen << endl;
+			printBoard(rows, columns, board);
+	
+			gen++;
+			if(output==1)sleep(1.5);
+			else if(output == 2){
+				cout << "Press enter to see the next generation: " << endl;
+				cin.ignore();
+			}
+		}
+	}
+	else if(output == 3){
+		ofstream outFile("GameOfLife.txt");
+		int stabilized = 0, count = 1, gen = 1;
 
-		gen++;
-		cout << "Press enter to see the next generation: " << endl;
-		cin.ignore();
+		while(stabilized == 0)
+		{
+			if(input == 1)stabilized = nextBoardClassic(rows, columns, board); 
+			else if(input == 2)stabilized = nextBoardTorus(rows, columns, board);
+			else if(input == 3)stabilized = nextBoardMirrored(rows, columns, board);
+		
+			if(stabilized == 1 || count > 100)	//loop continues until either stabilization or 100th generation is reached
+			{					//to prevent infinite loop caused by oscillators
+				cout << "File successfully printed out\n";
+				cout << "Press enter to exit the program." << endl;
+				cin.ignore();
+				break;
+			}
+			outFile << "Generation " << gen << endl;
+			printBoardFile(rows, columns, board, outFile);
+			gen++;	count++;
+		}
 	}
 }
 
@@ -541,10 +586,18 @@ int nextBoardMirrored(int rows, int columns, char**& board) //Creates a new boar
 	}
 }
 
-void printBoard(int rows, int columns, char** board){
+void printBoard(int rows, int columns, char** board){	//print out current board to console
 	for(int i = 0; i < rows; ++i)
 	{
 		for(int j = 0; j < columns; ++j) cout << board[i][j];
 		cout << endl;
+	}
+}
+
+void printBoardFile(int rows, int columns, char** board, ofstream& file){	//print out current board to output file
+	for(int i = 0; i < rows; ++i)
+	{
+		for(int j = 0; j < columns; ++j) file << board[i][j];
+		file << endl;
 	}
 }
