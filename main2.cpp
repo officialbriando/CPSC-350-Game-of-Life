@@ -32,27 +32,45 @@ void setDimensions(int& rows, int& columns, double& density)  //Sets the rows an
 {
 	cout << "Enter the amount of rows: ";
 	cin >> rows;
+	while(rows <= 1 || cin.fail()){
+		if(cin.fail()){
+			cin.clear();
+			cin.ignore(256, '\n');
+		}
+		cout << "Please enter a number greater than 1: ";
+		cin >> rows;
+	}
 
 	cout << "Enter the amount of columns: ";
 	cin >> columns;
 	
+	while(columns <= 1 || cin.fail()){
+		if(cin.fail()){
+			cin.clear();
+			cin.ignore(256, '\n');
+		}
+		cout << "Please enter a number greater than 1: ";
+		cin >> columns;
+	}	
 	cout << "Enter the density of the board. Number must be between 0 and 1: ";
 	cin >> density;
+	while(density < 0 || density > 1 || cin.fail()){
+		if(cin.fail()){
+			cin.clear();
+			cin.ignore(256, '\n');
+		}
+		cout << "Please enter a valid number between 0 and 1: ";
+		cin >> density;
+	}
 }
 
 void initializeBoard(int rows, int columns, double density, char**& board) //Initializes the board with the set population density. 
 { 
-	for(int i = 0; i < rows; ++i)
-	{
-		for(int j = 0; j < columns; ++j)
-		{
-			board[i][j] = '-';
-		}
+	for(int i = 0; i < rows; ++i){
+		for(int j = 0; j < columns; ++j){board[i][j] = '-';}
 	}
-	for(int i = 0; i < rows; ++i)
-	{
-		for(int j = 0; j < columns; ++j)
-		{
+	for(int i = 0; i < rows; ++i){
+		for(int j = 0; j < columns; ++j){
 			double a = 0;
 			a = (double)rand()/(RAND_MAX);
 			if(a<=density) board[i][j] = 'X';
@@ -94,11 +112,16 @@ void prepGame(string& file, int& rows, int& columns) //Method for running the en
 	cout << "Please enter the number of your desired option: ";
 	cin >> input;
 
-	while(input < 0 || input > 1)
-	{
+	while(input < 0 || input > 1 || cin.fail()){
+		if(cin.fail())
+		{
+			cin.clear();
+			cin.ignore(256, '\n');
+		}
 		cout << "Please enter a valid number listed above: ";
 		cin >> input;
 	}
+	
 	if(input == 0) //Initiates the creation of a board based on given conditions.
 	{
 		double density;
@@ -120,14 +143,29 @@ void prepGame(string& file, int& rows, int& columns) //Method for running the en
 }
 
 void startGame(int& rows, int& columns, char**& board){
-	cout << "Generation 0" << endl;
+	int input, output;
+	cout << "Which mode would you like to play?\n" <<
+	"1 - Classic Mode\t 2 - Torus Mode\t 3 - Mirror Mode\n" <<
+	"Enter the number of your desired mode: "; cin >> input;
+	while(input < 1 || input > 3 || cin.fail()){
+		if(cin.fail())
+		{
+			cin.clear();
+			cin.ignore(256, '\n');
+		}
+		cout << "Please enter a valid number listed above: ";
+		cin >> input;	
+	}
+	cout << " Generation 0" << endl;
 	printBoard(rows, columns, board);
 	int stabilized = 0, gen = 1;
 	cout << "Press enter to start the simulation: ";
 	cin.ignore();	cin.ignore();
 	while(stabilized == 0) //Sets the while loop using an indicator for whether the board has stabilized.
 	{
-		stabilized = nextBoardMirrored(rows, columns, board); //Integrated method for creating new generations returns a value indicating stabilization.
+		if(input == 1)stabilized = nextBoardClassic(rows, columns, board); //Integrated method for creating new generations returns a value indicating stabilization.
+		else if(input == 2)stabilized = nextBoardTorus(rows, columns, board);
+		else if(input == 3)stabilized = nextBoardMirrored(rows, columns, board);
 
 		if(stabilized == 1)
 		{
