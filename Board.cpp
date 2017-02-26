@@ -2,6 +2,7 @@
 #include <fstream> //File input and output
 #include <cstdlib> //Random method
 #include <string>  //String class 
+#include <unistd.h> //Sleep function
 #include "Board.h"
 
 using namespace std;
@@ -130,47 +131,7 @@ void Board::prepGame(string& file, int& rows, int& columns) //Method for running
 	}
 }
 
-void Board::startGame(int& rows, int& columns, char**& board){
-{
-	int input;
-	cout << "This program simulates John Conway's Game of Life.\n";
-	cout << "You can initialize your simulation from a random assignment, or a txt file.\n";
-	cout << "0 - Random Assignment \t 1 - Map Assignment\n";
-	cout << "Please enter the number of your desired option: ";
-	cin >> input;
-
-	while(input < 0 || input > 1 || cin.fail())
-	{	//Checking for incorrect input
-		if(cin.fail())
-		{
-			cin.clear();
-			cin.ignore(256, '\n');
-		}
-		cout << "Please enter a valid number listed above: ";
-		cin >> input;
-	}
-	
-	if(input == 0) //Initiates the creation of a board based on given conditions.
-	{
-		double density;
-		setDimensions(rows, columns, density);
-		char** currentGen = new char*[rows];
-		for(int i = 0; i < rows; ++i) {currentGen[i] = new char[columns];}
-		initializeBoard(rows, columns, density, currentGen);
-		startGame(rows, columns, currentGen);
-	}
-	else if(input == 1) //Initiates the read in of a designated file.
-	{
-		cout <<"Please enter the filename of your map: ";
-		cin >> file;	setDimensions(file.c_str(), rows, columns);
-		char** currentGen = new char*[rows];
-		for(int i = 0; i < rows; ++i) {currentGen[i] = new char[columns];}
-		initializeBoard(file.c_str(), currentGen);
-		startGame(rows, columns, currentGen);
-	}
-}
-
-void startGame(int& rows, int& columns, char**& board)
+void Board::startGame(int& rows, int& columns, char**& board)
 {
 	int input, output;
 	cout << "Which mode would you like to play?\n" <<
@@ -224,7 +185,7 @@ void startGame(int& rows, int& columns, char**& board)
 			printBoard(rows, columns, board);
 	
 			gen++;
-			if(output==1)sleep(1.5);
+			if(output==1) sleep(1.5);
 			else if(output == 2){
 				cout << "Press enter to see the next generation: " << endl;
 				cin.ignore();
