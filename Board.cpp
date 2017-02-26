@@ -20,12 +20,35 @@ void Board::setDimensions(int& rows, int& columns, double& density)  //Sets the 
 {
 	cout << "Enter the amount of rows: ";
 	cin >> rows;
-
+	while(rows <= 1 || cin.fail()){
+		if(cin.fail()){
+			cin.clear();
+			cin.ignore(256, '\n');
+		}
+		cout << "Please enter a number greater than 1: ";
+		cin >> rows;
+	}
 	cout << "Enter the amount of columns: ";
 	cin >> columns;
 	
+	while(columns <= 1 || cin.fail()){
+		if(cin.fail()){
+			cin.clear();
+			cin.ignore(256, '\n');
+		}
+		cout << "Please enter a number greater than 1: ";
+		cin >> columns;
+	}
 	cout << "Enter the density of the board. Number must be between 0 and 1: ";
 	cin >> density;
+	while(density < 0 || density > 1 || cin.fail()){
+		if(cin.fail()){
+			cin.clear();
+			cin.ignore(256, '\n');
+		}
+		cout << "Please enter a valid number between 0 and 1: ";
+		cin >> density;
+	}
 }
 
 void Board::setDimensions(string file, int& rows, int& columns)  //Reads in the first two ints of the mapfile and sets them.
@@ -38,17 +61,11 @@ void Board::setDimensions(string file, int& rows, int& columns)  //Reads in the 
 
 void Board::initializeBoard(int rows, int columns, double density, char**& board) //Initializes the board with the set population density. 
 { 
-	for(int i = 0; i < rows; ++i)
-	{
-		for(int j = 0; j < columns; ++j)
-		{
-			board[i][j] = '-';
-		}
+	for(int i = 0; i < rows; ++i){
+		for(int j = 0; j < columns; ++j){board[i][j] = '-';}
 	}
-	for(int i = 0; i < rows; ++i)
-	{
-		for(int j = 0; j < columns; ++j)
-		{
+	for(int i = 0; i < rows; ++i){
+		for(int j = 0; j < columns; ++j){
 			double a = 0;
 			a = (double)rand()/(RAND_MAX);
 			if(a<=density) board[i][j] = 'X';
@@ -82,11 +99,17 @@ void Board::prepGame(string& file, int& rows, int& columns) //Method for running
 	cout << "Please enter the number of your desired option: ";
 	cin >> input;
 
-	while(input < 0 || input > 1)
-	{
+	while(input < 0 || input > 1 || cin.fail())
+	{	//Checking for incorrect input
+		if(cin.fail())
+		{
+			cin.clear();
+			cin.ignore(256, '\n');
+		}
 		cout << "Please enter a valid number listed above: ";
 		cin >> input;
 	}
+	
 	if(input == 0) //Initiates the creation of a board based on given conditions.
 	{
 		double density;
@@ -108,36 +131,145 @@ void Board::prepGame(string& file, int& rows, int& columns) //Method for running
 }
 
 void Board::startGame(int& rows, int& columns, char**& board){
-	cout << "Generation 0" << endl;
-	printBoard(rows, columns, board);
-	int stabilized = 0, gen = 1;
-	cout << "Press enter to start the simulation: ";
-	cin.ignore();	cin.ignore();
-	while(stabilized == 0) //Sets the while loop using an indicator for whether the board has stabilized.
-	{
-		stabilized = nextBoardClassic(rows, columns, board); //Integrated method for creating new generations returns a value indicating stabilization.
+{
+	int input;
+	cout << "This program simulates John Conway's Game of Life.\n";
+	cout << "You can initialize your simulation from a random assignment, or a txt file.\n";
+	cout << "0 - Random Assignment \t 1 - Map Assignment\n";
+	cout << "Please enter the number of your desired option: ";
+	cin >> input;
 
-		if(stabilized == 1)
+	while(input < 0 || input > 1 || cin.fail())
+	{	//Checking for incorrect input
+		if(cin.fail())
 		{
-			cout << "Press enter to exit the program." << endl;
-			cin.ignore();
-			break;
+			cin.clear();
+			cin.ignore(256, '\n');
 		}
-
-		cout << "Generation " << gen << endl;
-		printBoard(rows, columns, board);
-
-		gen++;
-		cout << "Press enter to see the next generation: " << endl;
-		cin.ignore();
+		cout << "Please enter a valid number listed above: ";
+		cin >> input;
+	}
+	
+	if(input == 0) //Initiates the creation of a board based on given conditions.
+	{
+		double density;
+		setDimensions(rows, columns, density);
+		char** currentGen = new char*[rows];
+		for(int i = 0; i < rows; ++i) {currentGen[i] = new char[columns];}
+		initializeBoard(rows, columns, density, currentGen);
+		startGame(rows, columns, currentGen);
+	}
+	else if(input == 1) //Initiates the read in of a designated file.
+	{
+		cout <<"Please enter the filename of your map: ";
+		cin >> file;	setDimensions(file.c_str(), rows, columns);
+		char** currentGen = new char*[rows];
+		for(int i = 0; i < rows; ++i) {currentGen[i] = new char[columns];}
+		initializeBoard(file.c_str(), currentGen);
+		startGame(rows, columns, currentGen);
 	}
 }
 
-void Board::printBoard(int rows, int columns, char** board){
+void startGame(int& rows, int& columns, char**& board)
+{
+	int input, output;
+	cout << "Which mode would you like to play?\n" <<
+	"1 - Classic Mode\t 2 - Torus Mode\t 3 - Mirror Mode\n" <<
+	"Enter the number of your desired mode: "; cin >> input;
+	while(input < 1 || input > 3 || cin.fail())
+	{
+		if(cin.fail()){
+			cin.clear();
+			cin.ignore(256, '\n');
+		}
+		cout << "Please enter a valid number listed above: ";
+		cin >> input;	
+	}
+	cout << "How would you like to like the program to proceed?\n"
+	<< "1 - Let the program run the simulation on its own\n"
+	<< "2 - Press enter to output each consecutive generation\n"
+	<< "3 - Output the simulation to a file, 'GameOfLife.txt'\n" << "Enter input: ";
+	cin >> output;
+	while(output < 1 || output > 3 || cin.fail())
+	{
+		if(cin.fail())
+		{
+			cin.clear();
+			cin.ignore(256, '\n');
+		}
+		cout << "Please enter a valid number listed above: ";
+		cin >> input;	
+	}
+	if(output == 1 || output == 2)
+	{
+		cout << " Generation 0" << endl;
+		printBoard(rows, columns, board);
+		int stabilized = 0, gen = 1;
+		cout << "Press enter to start the simulation: ";
+		cin.ignore();	cin.ignore();
+		while(stabilized == 0) //Sets the while loop using an indicator for whether the board has stabilized.
+		{
+			if(input == 1)stabilized = nextBoardClassic(rows, columns, board); //Integrated method for creating new generations returns a value indicating stabilization.
+			else if(input == 2)stabilized = nextBoardTorus(rows, columns, board);
+			else if(input == 3)stabilized = nextBoardMirrored(rows, columns, board);
+	
+			if(stabilized == 1)
+			{
+				cout << "Press enter to exit the program." << endl;
+				cin.ignore();
+				break;
+			}
+	
+			cout << "Generation " << gen << endl;
+			printBoard(rows, columns, board);
+	
+			gen++;
+			if(output==1)sleep(1.5);
+			else if(output == 2){
+				cout << "Press enter to see the next generation: " << endl;
+				cin.ignore();
+			}
+		}
+	}
+	else if(output == 3){
+		ofstream outFile("GameOfLife.txt");
+		int stabilized = 0, count = 1, gen = 1;
+
+		while(stabilized == 0)
+		{
+			if(input == 1)stabilized = nextBoardClassic(rows, columns, board); 
+			else if(input == 2)stabilized = nextBoardTorus(rows, columns, board);
+			else if(input == 3)stabilized = nextBoardMirrored(rows, columns, board);
+		
+			if(stabilized == 1 || count > 100)	//loop continues until either stabilization or 100th generation is reached
+			{					//to prevent infinite loop caused by oscillators
+				cout << "File successfully printed out\n";
+				cout << "Press enter to exit the program." << endl;
+				cin.ignore();
+				break;
+			}
+			outFile << "Generation " << gen << endl;
+			printBoardFile(rows, columns, board, outFile);
+			gen++;	count++;
+		}
+	}
+}
+
+void Board::printBoard(int rows, int columns, char** board)
+{
 	for(int i = 0; i < rows; ++i)
 	{
 		for(int j = 0; j < columns; ++j) cout << board[i][j];
 		cout << endl;
+	}
+}
+
+void Board::printBoardFile(int rows, int columns, char** board, ofstream& file) //print out current board to output file
+{	
+	for(int i = 0; i < rows; ++i)
+	{
+		for(int j = 0; j < columns; ++j) file << board[i][j];
+		file << endl;
 	}
 }
 
