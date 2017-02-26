@@ -19,7 +19,9 @@ class Board
 		int nextBoardClassic(int rows, int columns, char**& board);
 		int nextBoardTorus(int rows, int columns, char**& board);
 		int nextBoardMirrored(int rows, int columns, char**& board);
+
 		void printBoard(int rows, int columns, char** board);
+		void printBoardFile(int rows, int columns, char** board, ofstream& file);
 
 		void prepGame(string& file, int& rows, int& columns);
 		void startGame(int& rows, int& columns, char**& board);
